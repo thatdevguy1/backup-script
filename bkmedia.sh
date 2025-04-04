@@ -4,7 +4,6 @@ LOCATION_NUM=0
 LINE_COUNT=1
 RESTORE_NUM=0
 
-
 usage() {
 	echo "-B  Backup all locations"
 	echo "-L [n]  Specify backup location"
@@ -17,7 +16,7 @@ listlocations() {
 		((LINE_COUNT++))
 	done < "$LOCATIONS_FILE"
 }
-# REMOVE UNUSED ARGUMENTS / PARAMETERS
+
 compressfile() {
 	REMOTE=$1
 	BACKUP=$2
@@ -30,7 +29,7 @@ compressfile() {
 	ORIGINAL_SIZE=$(ssh "$REMOTE" "ls -l '$JUST_PATH/$JUST_FILE' | awk '{print \$5}'")
 	TAR_SIZE=$(ssh "$REMOTE" "tar -czf - -C $JUST_PATH $JUST_FILE" | tee "$DEST/$TIMESTAMP/$JUST_FILE.tar.gz" | wc -c)
 	
-	echo "${TIMESTAMP}: Original Size: $ORIGINAL_SIZE bytes, Compressed Size: $TAR_SIZE bytes" >> "/Users/davidbland/.backup/alien_log" 
+	echo "${REMOTE} - ${TIMESTAMP} - Original Size: $ORIGINAL_SIZE bytes, Compressed Size: $TAR_SIZE bytes" >> "/Users/davidbland/.backup/alien_log" 
 
 	if [ $? -eq 0 ]; then
 		echo "tar created successfully"
@@ -57,17 +56,14 @@ backup() {
 		excluded_files=($(ssh -n "$REMOTE" "find '$BACKUP' -name '*.xyzar'"))
 		rsync -avz --exclude="*.xyzar" "$REMOTE:$BACKUP/" "$DEST/$TIMESTAMP"
 
-#		for file in "${excluded_files[@]}"; do
-#			compressfile "$REMOTE" "$BACKUP" "$file" "$TIMESTAMP" "$DEST"
-#		done
 		while IFS= read -r file; do
 		    compressfile "$REMOTE" "$BACKUP" "$file" "$TIMESTAMP" "$DEST"
 		done < <(ssh -n "$REMOTE" "find '$BACKUP' -name '*.xyzar'")
 			
 		if [ $? -eq 0 ]; then
-			echo "File successfully transferred to remote server"
+			echo "backup successfully" 
 		else
-			echo "Failed to transfer file to remote server"
+			echo "Failed to backup" 
 			exit 1
 		fi
 	done
@@ -82,7 +78,6 @@ startRestoreOrBackup() {
 
 	if [[ $LOCATION_NUM -gt 0 ]]
 	then
-		#######TRY NOT PUTTING THIS INTO AN ARRAY BET IT WORKS#########
 		SINGLE_LOCATION=("${LOCATIONS[$LOCATION_NUM - 1]}")
 		if [[ $RESTORE_NUM -gt 0 ]]
 		then
