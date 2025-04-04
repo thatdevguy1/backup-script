@@ -46,7 +46,7 @@ backup() {
 		IFS=":" read -r -a array <<< "$line"
 		BACKUP="${array[1]}"
 		REMOTE="${array[0]}"
-	
+		echo "line ---- $line"	
 		IFS="/" read -r -a array2 <<< "$BACKUP"
 		LASTINDEX=$((${#array2[@]} - 1))
 		DEST="/Users/davidbland/.backup/${array2[${LASTINDEX}]}-${REMOTE}"
@@ -104,11 +104,19 @@ restore() {
 		DEST="/Users/davidbland/.backup/${array2[${LASTINDEX}]}-${REMOTE}"
 		echo "Removing files from ${REMOTE}:${BACKUP}"	
 		ssh ${REMOTE} "mkdir -p ${BACKUP}/.tmp && mv ${BACKUP}/* ${BACKUP}/.tmp"
-			
 		LATEST_DIR=$(ls -1 "$DEST" | sort -r | head -n ${RESTORE_NUM} | tail -n 1)
 
 		rsync -avz "$DEST/$LATEST_DIR/" "$REMOTE:$BACKUP" 
 	done
+
+		if [ $? -eq 0 ]; then
+			ssh -n "${REMOTE}" "rm -rf ${BACKUP}/.tmp"
+			echo "restore success" 	
+		else
+			echo "Failed to restore" 
+			exit 1
+		fi
+
 }
 
 while getopts ":hBL:R:" opt; do
