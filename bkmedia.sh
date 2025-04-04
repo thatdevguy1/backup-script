@@ -131,7 +131,12 @@ while getopts ":hBL:R:" opt; do
 			LOCATION_NUM="$OPTARG"
 			;;
 		R)
-			RESTORE_NUM=${OPTARG:-1}
+			if [[ -z "$OPTARG" || "$OPTARG" == -* ]]; then
+				RESTORE_NUM=1
+				((OPTIND--))  # Rewind to treat the next arg as the next option
+			else
+				RESTORE_NUM="$OPTARG"
+			fi
 			;;
 	esac
 done
