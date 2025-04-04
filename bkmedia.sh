@@ -52,7 +52,6 @@ backup() {
 		DEST="/Users/davidbland/.backup/${array2[${LASTINDEX}]}-${REMOTE}"
 		mkdir -p "$DEST/$TIMESTAMP"
 	
-		echo ">>>>>>>>>>>>$BACKUP, $REMOTE"
 		excluded_files=($(ssh -n "$REMOTE" "find '$BACKUP' -name '*.xyzar'"))
 		rsync -avz --exclude="*.xyzar" "$REMOTE:$BACKUP/" "$DEST/$TIMESTAMP"
 
@@ -103,7 +102,6 @@ restore() {
 		IFS="/" read -r -a array2 <<< "$BACKUP"
 		LASTINDEX=$((${#array2[@]} - 1))
 		DEST="/Users/davidbland/.backup/${array2[${LASTINDEX}]}-${REMOTE}"
-		echo "DESTINATION ${DEST}"	
 		echo "Removing files from ${REMOTE}:${BACKUP}"	
 		ssh ${REMOTE} "mkdir -p ${BACKUP}/.tmp && mv ${BACKUP}/* ${BACKUP}/.tmp"
 			
@@ -123,7 +121,6 @@ while getopts ":hBL:R:" opt; do
 			;;
 		L)
 			LOCATION_NUM="$OPTARG"
-			echo "location---> $LOCATION_NUM"
 			;;
 		R)
 			RESTORE_NUM=${OPTARG:-1}
