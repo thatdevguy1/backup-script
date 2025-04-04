@@ -80,10 +80,4 @@ Compressed Size: 100MB
 - **Check `locations.cfg`** for correct formatting.
 - **Verify `alien_logs`** for `.xyzar` file reports.
 
-## 📜 License
-
-This project is licensed under the MIT License. See `LICENSE` for details.
-
 🚀 *Handle your backups like a pro, and may the force be with you!* ✨
-
-
